@@ -2,9 +2,9 @@ name: Publish Docker image
 on:
   push
 
-env:
-  DOCKER_BUILDKIT: 1
-  IMAGE_NAME: sample-image
+# env:
+#   DOCKER_BUILDKIT: 1
+#   IMAGE_NAME: sample-image
 
 jobs:
   push_to_registry:
@@ -19,7 +19,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
           registry: ghcr.io
-          repository: ${{ github.repository }}/${{IMAGE_NAME}}
+          repository: ${{ github.repository }}/sample-image
           tag_with_sha: true
         env:
           DOCKER_BUILDKIT: 1
