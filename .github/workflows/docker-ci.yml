@@ -1,0 +1,27 @@
+name: Publish Docker image
+on:
+  push
+  # release:
+  #   types: [published]
+jobs:
+  push_to_registry:
+    name: Push Docker image to GitHub Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+          registry: ghcr.io
+          repository: ${{ github.repository }}/sample-image
+          # tag_with_ref: true
+          tag_with_sha: true
+          # password: ${{ secrets.GITHUB_TOKEN }}
+          # registry: docker.pkg.github.com
+          # repository: video-research/circleci-gke
+          # tag_with_ref: true
+        env:
+          DOCKER_BUILDKIT: 1
