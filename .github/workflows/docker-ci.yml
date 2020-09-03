@@ -19,7 +19,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
           registry: ghcr.io
-          repository: ${{ github.repository }}/${IMAGE_NAME}
+          repository: ${{ github.repository }}/${{IMAGE_NAME}}
           tag_with_sha: true
         env:
           DOCKER_BUILDKIT: 1
