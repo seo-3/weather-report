@@ -27,7 +27,7 @@ jobs:
   dockle:
       name: Dockle
       runs-on: ubuntu-18.04
-      needs: build
+      # needs: build TODO あとでいれる
       steps:
         - uses: actions/checkout@master
 
