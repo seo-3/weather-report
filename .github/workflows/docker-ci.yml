@@ -99,10 +99,11 @@ jobs:
         id: scan-trivy
         # trivy -q --severity HIGH,CRITICAL \
         run: |
-          trivy  \
-            --exit-code 1 ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
+          trivy -o results.json --exit-code 1 ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
+          echo '#############'
+          cat results.json
         continue-on-error: true
-
+        
       - name: Scan Report
         uses: actions/github-script@0.9.0
         with:
