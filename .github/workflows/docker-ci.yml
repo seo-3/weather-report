@@ -7,22 +7,22 @@ on:
 #   IMAGE_NAME: sample-image
 
 jobs:
-#   push_to_registry:
-#     name: Push Docker image to GitHub Packages
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Check out the repo
-#         uses: actions/checkout@v2
-#       - name: Push to GitHub Packages
-#         uses: docker/build-push-action@v1
-#         with:
-#           username: ${{ github.actor }}
-#           password: ${{ secrets.GHCR_PAT }}
-#           registry: ghcr.io
-#           repository: ${{ github.repository }}/sample-image
-#           tag_with_sha: true
-#         env:
-#           DOCKER_BUILDKIT: 1
+  # push_to_registry:
+  #   name: Push Docker image to GitHub Packages
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out the repo
+  #       uses: actions/checkout@v2
+  #     - name: Push to GitHub Packages
+  #       uses: docker/build-push-action@v1
+  #       with:
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GHCR_PAT }}
+  #         registry: ghcr.io
+  #         repository: ${{ github.repository }}/sample-image
+  #         tag_with_sha: true
+  #       env:
+  #         DOCKER_BUILDKIT: 1
 
   dockle:
       name: Dockle
@@ -30,7 +30,7 @@ jobs:
       # needs: build TODO あとでいれる
       steps:
         - uses: actions/checkout@master
-        
+
         # - name: Pull image from GitHub Registry
         #   run: docker pull ghcr.io/${{ github.repository }}/sample-image:${{ github.sha}}
 
@@ -52,4 +52,5 @@ jobs:
             rm dockle.deb
 
         - name: Check image with dockle
-          run: dockle ghcr.io/${{ github.repository }}/sample-image:${{ github.sha}}
+          # run: dockle ghcr.io/${{ github.repository }}/sample-image:${{ github.sha}}
+          run: dockle ghcr.io/${{ github.repository }}/sample-image:sha-12efab6
