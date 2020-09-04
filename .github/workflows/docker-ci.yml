@@ -1,6 +1,7 @@
 name: Publish Docker image
 on:
-  push
+  # push
+  pull_request:
 
 # env:
 #   DOCKER_BUILDKIT: 1
@@ -83,7 +84,7 @@ jobs:
         continue-on-error: true
 
   report:
-    name: Report ci
+    name: Scan Report
     runs-on: ubuntu-18.04
     needs: [trivy, dockle]
     steps:
