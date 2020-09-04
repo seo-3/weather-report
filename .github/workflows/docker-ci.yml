@@ -31,11 +31,11 @@ jobs:
       steps:
         - uses: actions/checkout@master
 
-        - name: Login GitHub Registry
-          run: cat ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        # - name: Login GitHub Registry
+        #   run: cat ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-        - name: Pull image from GitHub Registry
-          run: docker pull docker.pkg.github.com/${{ github.repository }}/sample-image:${{ github.sha}}
+        # - name: Pull image from GitHub Registry
+        #   run: docker pull ghcr.io/${{ github.repository }}/sample-image:${{ github.sha}}
 
         - name: Install dockle
           run: |
@@ -46,3 +46,6 @@ jobs:
             curl -L -o dockle.deb https://github.com/goodwithtech/dockle/releases/download/v${VERSION}/dockle_${VERSION}_Linux-64bit.deb
             sudo dpkg -i dockle.deb
             rm dockle.deb
+
+        - name: Check image with dockle
+          run: dockle ghcr.io/${{ github.repository }}/sample-image:${{ github.sha}}
