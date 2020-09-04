@@ -54,7 +54,7 @@ jobs:
           continue-on-error: true
 
   trivy:
-    name: Trivy Scan Vulnerability
+    name: Trivy Scan
     runs-on: ubuntu-18.04
       # needs: push_to_registry
     steps:
@@ -67,9 +67,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_PAT }}
 
-      # - name: Pull image from GitHub Registry
-      #   run: docker pull docker.pkg.github.com/${{ github.repository }}/${IMAGE_NAME}:${IMAGE_TAG}
-
       - name: Install trivy
         run: |
           sudo apt-get install --no-install-recommends apt-transport-https gnupg
@@ -79,7 +76,33 @@ jobs:
           sudo apt-get install --no-install-recommends trivy
 
       - name: Vulnerability Scan with Trivy
+        id: scan-trivy
         run: |
           trivy -q --severity WARNING,HIGH,CRITICAL \
             --exit-code 1 ghcr.io/${{ github.repository }}/sample-image:sha-12efab6
         continue-on-error: true
+
+  report:
+    name: Report ci
+    runs-on: ubuntu-18.04
+    needs: [trivy, dockle]
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: actions/github-script@0.9.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `## \`ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}\`
+            #### Terraform Format and Style 🖌\`${{ steps.check-dockled.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.scan-trivy.outcome }}\`
+            <details><summary>Show Scan</summary>
+            \`\`\`terraform\n${{ steps.scan-trivy.outputs.stdout }}\`\`\`
+            </details>
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
