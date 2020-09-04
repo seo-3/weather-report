@@ -101,7 +101,7 @@ jobs:
         id: scan-trivy
         # trivy -q --severity HIGH,CRITICAL \
         run: |
-          trivy -o results.json ghcr.io/${{ github.repository }}/sample-image:sha-1f855da
+          trivy --no-progress -o results.json ghcr.io/${{ github.repository }}/sample-image:sha-1f855da
           ls -al
           echo '#############'
           cat results.json
