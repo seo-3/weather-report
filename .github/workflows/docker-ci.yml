@@ -101,7 +101,7 @@ jobs:
         id: scan-trivy
         # trivy -q --severity HIGH,CRITICAL \
         run: |
-          trivy --no-progress -o results.json ghcr.io/${{ github.repository }}/sample-image:sha-1f855da
+          trivy -o results.json ghcr.io/${{ github.repository }}/sample-image:sha-1f855da
           ls -al
           echo '#############'
           cat results.json
@@ -109,7 +109,13 @@ jobs:
           echo "::set-output name=test::$value"
 
         continue-on-error: true
-        
+
+      - name: Upload math result for job 2
+        uses: actions/upload-artifact@v2
+        with:
+          name: homework
+          path: results.json
+
       - name: Scan Report
         uses: actions/github-script@0.9.0
         with:
