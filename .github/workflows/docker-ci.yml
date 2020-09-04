@@ -48,11 +48,17 @@ jobs:
 
         - name: Check image with dockle
           id: check-dockle
-          run: dockle ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
+          run: dockle -f json -o dockle-results.json ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
           continue-on-error: true
 
+        - name: Upload scan result
+          uses: actions/upload-artifact@v2
+          with:
+            name: dockle
+            path: dockle-results.json
+
   trivy:
-    name: Trivy Scan
+    name: Trivy
     runs-on: ubuntu-18.04
     outputs:
       output1: ${{ steps.scan-trivy.outputs.test }}
@@ -81,11 +87,11 @@ jobs:
         #  trivy -q --severity HIGH,CRITICAL \
         #     --exit-code 1 docker.pkg.github.com/${{ github.repository }}/sample-image:${{ github.sha }}
         run: |
-          trivy -o scan-reports.txt ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
+          trivy -o trivy-results.txt ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
         continue-on-error: true
 
       - name: Upload scan result
         uses: actions/upload-artifact@v2
         with:
           name: trivy
-          path: scan-reports.txt
+          path: trivy-results.txt
