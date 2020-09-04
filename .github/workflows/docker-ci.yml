@@ -76,6 +76,8 @@ jobs:
   trivy:
     name: Trivy Scan
     runs-on: ubuntu-18.04
+    outputs:
+      output1: ${{ steps.scan-trivy.outputs.test }}
     # needs: push_to_registry
     steps:
       - uses: actions/checkout@master
@@ -103,6 +105,9 @@ jobs:
           ls -al
           echo '#############'
           cat results.json
+          value=`cat results.json`
+          echo "::set-output name=test::$value"
+
         continue-on-error: true
         
       - name: Scan Report
@@ -113,7 +118,7 @@ jobs:
             const output = `#### \`ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}\`
             ##### scan result ⚙️\`${{ steps.scan-trivy.outcome }}\`
             <details><summary>Show Report</summary>
-            \`\`\`trivy\n${{ steps.scan-trivy.outputs.stdout }}\`\`\`
+            \`\`\`trivy\n${{ steps.scan-trivy.outputs.test }}\`\`\`
             </details>
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
             github.issues.createComment({
