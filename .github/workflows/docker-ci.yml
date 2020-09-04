@@ -55,6 +55,24 @@ jobs:
           run: dockle ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
           continue-on-error: true
 
+        - name: Dockle Report
+          uses: actions/github-script@0.9.0
+          with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            script: |
+              const output = `#### \`ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}\`
+              ##### scan result ⚙️\`${{ steps.check-dockle.outcome }}\`
+              <details><summary>Show Report</summary>
+              \`\`\`trivy\n${{ steps.check-dockle.outputs.stdout }}\`\`\`
+              </details>
+              *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+              github.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              })
+
   trivy:
     name: Trivy Scan
     runs-on: ubuntu-18.04
