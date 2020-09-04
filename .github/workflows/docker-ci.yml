@@ -83,14 +83,8 @@ jobs:
             --exit-code 1 ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
         continue-on-error: true
 
-  report:
-    name: Scan Report
-    runs-on: ubuntu-18.04
-    needs: [trivy, dockle]
-    steps:
-      - uses: actions/checkout@master
-
-      - uses: actions/github-script@0.9.0
+      - name: Scan Report
+        uses: actions/github-script@0.9.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -107,3 +101,28 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
+
+  # report:
+  #   name: Scan Report
+  #   runs-on: ubuntu-18.04
+  #   needs: [trivy, dockle]
+  #   steps:
+  #     - uses: actions/checkout@master
+
+  #     - uses: actions/github-script@0.9.0
+  #       with:
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         script: |
+  #           const output = `##### \`ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}\`
+  #           #### Terraform Format and Style 🖌\`${{ steps.check-dockle.outcome }}\`
+  #           #### Terraform Initialization ⚙️\`${{ steps.scan-trivy.outcome }}\`
+  #           <details><summary>Show Scan</summary>
+  #           \`\`\`terraform\n${{ steps.scan-trivy.outputs.stdout }}\`\`\`
+  #           </details>
+  #           *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+  #           github.issues.createComment({
+  #             issue_number: context.issue.number,
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             body: output
+  #           })
