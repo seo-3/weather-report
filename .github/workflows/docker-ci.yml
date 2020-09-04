@@ -52,7 +52,7 @@ jobs:
 
         - name: Check image with dockle
           id: check-dockle
-          run: dockle ghcr.io/${{ github.repository }}/sample-image:sha-${{ github.sha }}
+          run: dockle ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
           continue-on-error: true
 
   trivy:
@@ -81,7 +81,7 @@ jobs:
         id: scan-trivy
         run: |
           trivy -q --severity HIGH,CRITICAL \
-            --exit-code 1 ghcr.io/${{ github.repository }}/sample-image:sha-${{ github.sha }}
+            --exit-code 1 ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
         continue-on-error: true
 
       - name: Scan Report
@@ -89,7 +89,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### \`ghcr.io/${{ github.repository }}/sample-image:sha-${{ github.sha }}\`
+            const output = `#### \`ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}\`
             ##### scan result ⚙️\`${{ steps.scan-trivy.outcome }}\`
             <details><summary>Show Report</summary>
             \`\`\`trivy\n${{ steps.scan-trivy.outputs.stdout }}\`\`\`
