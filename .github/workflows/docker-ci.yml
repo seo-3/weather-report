@@ -8,27 +8,27 @@ on:
 #   IMAGE_NAME: sample-image
 
 jobs:
-  # push_to_registry:
-  #   name: Push Docker image to GitHub Packages
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v2
-  #     - name: Push to GitHub Packages
-  #       uses: docker/build-push-action@v1
-  #       with:
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GHCR_PAT }}
-  #         registry: ghcr.io
-  #         repository: ${{ github.repository }}/sample-image
-  #         tag_with_sha: true
-  #       env:
-  #         DOCKER_BUILDKIT: 1
+  push_to_registry:
+    name: Push Docker image to GitHub Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+          registry: ghcr.io
+          repository: ${{ github.repository }}/sample-image
+          tag_with_sha: true
+        env:
+          DOCKER_BUILDKIT: 1
 
   dockle:
       name: Dockle
       runs-on: ubuntu-18.04
-      # needs: push_to_registry
+      needs: push_to_registry
       steps:
         - uses: actions/checkout@master
 
@@ -51,13 +51,13 @@ jobs:
 
         - name: Check image with dockle
           id: check-dockle
-          run: dockle ghcr.io/${{ github.repository }}/sample-image:sha-12efab6
+          run: dockle ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
           continue-on-error: true
 
   trivy:
     name: Trivy Scan
     runs-on: ubuntu-18.04
-      # needs: push_to_registry
+    needs: push_to_registry
     steps:
       - uses: actions/checkout@master
 
@@ -79,8 +79,8 @@ jobs:
       - name: Vulnerability Scan with Trivy
         id: scan-trivy
         run: |
-          trivy -q --severity WARNING,HIGH,CRITICAL \
-            --exit-code 1 ghcr.io/${{ github.repository }}/sample-image:sha-12efab6
+          trivy -q --severity HIGH,CRITICAL \
+            --exit-code 1 ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
         continue-on-error: true
 
   report:
@@ -94,8 +94,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `## \`ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}\`
-            #### Terraform Format and Style 🖌\`${{ steps.check-dockled.outcome }}\`
+            const output = `##### \`ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}\`
+            #### Terraform Format and Style 🖌\`${{ steps.check-dockle.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.scan-trivy.outcome }}\`
             <details><summary>Show Scan</summary>
             \`\`\`terraform\n${{ steps.scan-trivy.outputs.stdout }}\`\`\`
