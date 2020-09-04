@@ -76,7 +76,7 @@ jobs:
   trivy:
     name: Trivy Scan
     runs-on: ubuntu-18.04
-    needs: push_to_registry
+    # needs: push_to_registry
     steps:
       - uses: actions/checkout@master
 
