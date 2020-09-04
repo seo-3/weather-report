@@ -97,8 +97,9 @@ jobs:
 
       - name: Vulnerability Scan with Trivy
         id: scan-trivy
+        # trivy -q --severity HIGH,CRITICAL \
         run: |
-          trivy -q --severity HIGH,CRITICAL \
+          trivy -f json -o results.json  \
             --exit-code 1 ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
         continue-on-error: true
 
