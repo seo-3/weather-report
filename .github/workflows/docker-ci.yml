@@ -5,7 +5,7 @@ on:
 
 jobs:
   hadolint:
-    name: runner / hadolint
+    name: Hadolint
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -16,95 +16,95 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           fail_on_error: false
-  # push_to_registry:
-  #   name: Push Docker image to GitHub Packages
-  #   runs-on: ubuntu-latest
-  #   needs: hadolint
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v2
-  #     - name: Push to GitHub Packages
-  #       uses: docker/build-push-action@v1
-  #       with:
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GHCR_PAT }}
-  #         registry: ghcr.io
-  #         repository: ${{ github.repository }}/sample-image
-  #         # tag_with_sha: true
-  #         tags: ${{ github.sha }}
-  #       env:
-  #         DOCKER_BUILDKIT: 1
+  push_to_registry:
+    name: Push Docker image to GitHub Packages
+    runs-on: ubuntu-latest
+    needs: hadolint
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+          registry: ghcr.io
+          repository: ${{ github.repository }}/sample-image
+          # tag_with_sha: true
+          tags: ${{ github.sha }}
+        env:
+          DOCKER_BUILDKIT: 1
 
-  # dockle:
-  #     name: Dockle
-  #     runs-on: ubuntu-18.04
-  #     needs: push_to_registry
-  #     steps:
-  #       - uses: actions/checkout@master
+  dockle:
+      name: Dockle
+      runs-on: ubuntu-18.04
+      needs: push_to_registry
+      steps:
+        - uses: actions/checkout@master
 
-  #       - name: Login to GitHub Container Registry
-  #         uses: docker/login-action@v1
-  #         with:
-  #           registry: ghcr.io
-  #           username: ${{ github.repository_owner }}
-  #           password: ${{ secrets.GHCR_PAT }}
+        - name: Login to GitHub Container Registry
+          uses: docker/login-action@v1
+          with:
+            registry: ghcr.io
+            username: ${{ github.repository_owner }}
+            password: ${{ secrets.GHCR_PAT }}
 
-  #       - name: Install dockle
-  #         run: |
-  #           VERSION=$(curl --silent "https://api.github.com/repos/goodwithtech/dockle/releases/latest" | \
-  #           grep '"tag_name":' | \
-  #           sed -E 's/.*"v([^"]+)".*/\1/' \
-  #           )
-  #           curl -L -o dockle.deb https://github.com/goodwithtech/dockle/releases/download/v${VERSION}/dockle_${VERSION}_Linux-64bit.deb
-  #           sudo dpkg -i dockle.deb
-  #           rm dockle.deb
+        - name: Install dockle
+          run: |
+            VERSION=$(curl --silent "https://api.github.com/repos/goodwithtech/dockle/releases/latest" | \
+            grep '"tag_name":' | \
+            sed -E 's/.*"v([^"]+)".*/\1/' \
+            )
+            curl -L -o dockle.deb https://github.com/goodwithtech/dockle/releases/download/v${VERSION}/dockle_${VERSION}_Linux-64bit.deb
+            sudo dpkg -i dockle.deb
+            rm dockle.deb
 
-  #       - name: Check image with dockle
-  #         id: check-dockle
-  #         run: dockle -f json -o dockle-results.json ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
-  #         continue-on-error: true
+        - name: Check image with dockle
+          id: check-dockle
+          run: dockle -f json -o dockle-results.json ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
+          continue-on-error: true
 
-  #       - name: Upload scan result
-  #         uses: actions/upload-artifact@v2
-  #         with:
-  #           name: dockle
-  #           path: dockle-results.json
+        - name: Upload scan result
+          uses: actions/upload-artifact@v2
+          with:
+            name: dockle
+            path: dockle-results.json
 
-  # trivy:
-  #   name: Trivy
-  #   runs-on: ubuntu-18.04
-  #   outputs:
-  #     output1: ${{ steps.scan-trivy.outputs.test }}
-  #   needs: push_to_registry
-  #   steps:
-  #     - uses: actions/checkout@master
+  trivy:
+    name: Trivy
+    runs-on: ubuntu-18.04
+    outputs:
+      output1: ${{ steps.scan-trivy.outputs.test }}
+    needs: push_to_registry
+    steps:
+      - uses: actions/checkout@master
 
-  #     - name: Login to GitHub Container Registry
-  #       uses: docker/login-action@v1
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.repository_owner }}
-  #         password: ${{ secrets.GHCR_PAT }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PAT }}
 
-  #     - name: Install trivy
-  #       run: |
-  #         sudo apt-get install --no-install-recommends apt-transport-https gnupg
-  #         wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-  #         echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -cs) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-  #         sudo apt-get update
-  #         sudo apt-get install --no-install-recommends trivy
+      - name: Install trivy
+        run: |
+          sudo apt-get install --no-install-recommends apt-transport-https gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -cs) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends trivy
 
-  #     - name: Vulnerability Scan with Trivy
-  #       id: scan-trivy
-  #       #  sevによりfailにする用途
-  #       #  trivy -q --severity HIGH,CRITICAL \
-  #       #     --exit-code 1 docker.pkg.github.com/${{ github.repository }}/sample-image:${{ github.sha }}
-  #       run: |
-  #         trivy -o trivy-results.txt ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
-  #       continue-on-error: true
+      - name: Vulnerability Scan with Trivy
+        id: scan-trivy
+        #  sevによりfailにする用途
+        #  trivy -q --severity HIGH,CRITICAL \
+        #     --exit-code 1 docker.pkg.github.com/${{ github.repository }}/sample-image:${{ github.sha }}
+        run: |
+          trivy -o trivy-results.txt ghcr.io/${{ github.repository }}/sample-image:${{ github.sha }}
+        continue-on-error: true
 
-  #     - name: Upload scan result
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: trivy
-  #         path: trivy-results.txt
+      - name: Upload scan result
+        uses: actions/upload-artifact@v2
+        with:
+          name: trivy
+          path: trivy-results.txt
